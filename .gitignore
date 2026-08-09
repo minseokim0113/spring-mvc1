@@ -1,0 +1,16 @@
+.DS_Store
+*.iml
+
+# IDE
+.idea/
+
+# Gradle
+.gradle/
+.gradle-home/
+build/
+
+# Local temp files
+tmp/
+
+# Course materials kept locally only
+*.pdf
