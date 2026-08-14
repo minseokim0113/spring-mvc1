@@ -1,0 +1,123 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>장바구니</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 1100px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">장바구니</h1>
+            <p class="text-muted mb-0">담은 상품을 확인하고 주문으로 진행하세요.</p>
+        </div>
+        <a class="btn btn-outline-secondary" th:href="@{/shop/items}">쇼핑 계속하기</a>
+    </div>
+
+    <div class="card shadow-sm" th:if="${#lists.isEmpty(cartItems)}">
+        <div class="card-body p-5 text-center">
+            <h2 class="h4 mb-3">장바구니가 비어 있습니다</h2>
+            <p class="text-muted mb-4">원하는 상품을 담은 뒤 다시 방문해 주세요.</p>
+            <a class="btn btn-primary" th:href="@{/shop/items}">상품 목록 보기</a>
+        </div>
+    </div>
+
+    <div class="row g-4" th:if="${not #lists.isEmpty(cartItems)}">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h4 mb-4">담은 상품</h2>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                            <tr>
+                                <th>상품번호</th>
+                                <th>상품명</th>
+                                <th>가격</th>
+                                <th>상태</th>
+                                <th>수량</th>
+                                <th>합계</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="cartItem : ${cartItems}">
+                                <td th:text="${cartItem.itemId}">1</td>
+                                <td>
+                                    <a class="text-decoration-none"
+                                       th:if="${cartItem.status.name() != 'DELETED'}"
+                                       th:href="@{/shop/items/{itemId}(itemId=${cartItem.itemId})}"
+                                       th:text="${cartItem.itemName}">상품명</a>
+                                    <span class="text-muted"
+                                          th:if="${cartItem.status.name() == 'DELETED'}">삭제된 상품</span>
+                                </td>
+                                <td>
+                                    <span th:if="${cartItem.status.name() != 'DELETED'}"
+                                          th:text="${cartItem.price} + '원'">10000원</span>
+                                    <span class="text-muted"
+                                          th:if="${cartItem.status.name() == 'DELETED'}">-</span>
+                                </td>
+                                <td>
+                                    <span class="fw-semibold text-success"
+                                          th:if="${cartItem.status.name() == 'AVAILABLE'}">구매 가능</span>
+                                    <span class="fw-bold text-danger"
+                                          th:if="${cartItem.status.name() == 'SOLD_OUT'}">품절</span>
+                                    <span class="fw-bold text-danger"
+                                          th:if="${cartItem.status.name() == 'DELETED'}">삭제됨</span>
+                                </td>
+                                <td th:text="${cartItem.quantity}">1</td>
+                                <td>
+                                    <span th:if="${cartItem.status.name() == 'AVAILABLE'}"
+                                          th:text="${cartItem.totalPrice} + '원'">10000원</span>
+                                    <span class="text-muted"
+                                          th:if="${cartItem.status.name() != 'AVAILABLE'}">계산 제외</span>
+                                </td>
+                                <td class="text-end">
+                                    <form method="post"
+                                          th:action="@{/shop/items/cart/{cartItemId}/remove(cartItemId=${cartItem.id})}">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">삭제</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-warning mt-3 mb-0"
+                         th:if="${#lists.contains(cartItems.![status.name()], 'SOLD_OUT') or #lists.contains(cartItems.![status.name()], 'DELETED')}">
+                        품절되었거나 삭제된 상품은 총 결제 금액 계산에서 제외됩니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-3">주문 요약</h2>
+                    <dl class="row mb-4">
+                        <dt class="col-6">총 상품 수</dt>
+                        <dd class="col-6 text-end" th:text="${totalQuantity} + '개'">0개</dd>
+
+                        <dt class="col-6">총 결제 금액</dt>
+                        <dd class="col-6 text-end fw-bold" th:text="${totalPrice} + '원'">0원</dd>
+                    </dl>
+
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-primary btn-lg" th:href="@{/shop/items/checkout}">구매 페이지로 이동</a>
+                        <a class="btn btn-outline-dark" th:href="@{/shop/items}">계속 쇼핑하기</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
